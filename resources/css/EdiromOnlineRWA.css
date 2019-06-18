@@ -239,6 +239,17 @@ p {
     font-size: 9px;
 }
 
+.annotation.Choraltext .annotIcon:before {
+    line-height: 1;
+    /*font-family: bravura;
+    content: "\E595";*/
+    content: "text";
+    position: relative;
+    top: 4px;
+    left: 0.15em;
+    font-size: 9px;
+}
+
 .ediromWindow .measureInner {
     background-image: radial-gradient(at center center , rgba(100, 100, 100, 0.3), rgba(0, 0, 0, 0) 5px);
     border-radius: 15px;
