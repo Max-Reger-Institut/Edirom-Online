@@ -80,7 +80,7 @@
             <arg value="app"/>
             <arg value="build"/>
         </exec>
-        <delete dir="build/temp/"></delete>
+        <!--<delete dir="build/temp/"></delete>-->
     </target>
     
     <target name="replace" depends="prep-existdb">
