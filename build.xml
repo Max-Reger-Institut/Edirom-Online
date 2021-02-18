@@ -75,7 +75,7 @@
         </copy>
     </target>
     
-    <target name="sencha" depends="clean">
+    <target name="sencha">
         <exec executable="sencha">
             <arg value="app"/>
             <arg value="build"/>
