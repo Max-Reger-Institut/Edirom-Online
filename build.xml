@@ -70,6 +70,9 @@
             <fileset dir="./add"/>
         </copy>
         <copy todir="${build.dir}">
+            <fileset dir="./build/production/EdiromOnline/"/>
+        </copy>
+        <copy todir="${build.dir}">
             <file file="build.xml"/>
             <file file="expath-pkg.xml"/>
         </copy>
@@ -80,7 +83,7 @@
             <arg value="app"/>
             <arg value="build"/>
         </exec>
-        <!--<delete dir="build/temp/"></delete>-->
+        <delete dir="build/temp/"></delete>
     </target>
     
     <target name="replace" depends="prep-existdb">
