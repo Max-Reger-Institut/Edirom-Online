@@ -83,7 +83,7 @@
         <delete dir="build/temp/"></delete>
     </target>
     
-    <target name="replace" depends="prep-existdb">
+    <!--<target name="replace" depends="prep-existdb">
         <replace file="${build.dir}/index.html">
             <replacetoken><![CDATA[src="app.js"]]></replacetoken>
             <replacevalue><![CDATA[src="edirom/app.js"]]></replacevalue>
@@ -100,7 +100,7 @@
             <replacetoken><![CDATA[src="resources]]></replacetoken>
             <replacevalue><![CDATA[src="edirom/resources]]></replacevalue>
         </replace>
-    </target>
+    </target>-->
 
     
         
