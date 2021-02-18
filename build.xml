@@ -67,15 +67,16 @@
     
     <target name="prep-existdb" depends="sencha">
         <copy todir="${build.dir}">
-            <fileset dir="./add"/>
+            <fileset dir="add/"/>
         </copy>
         <copy todir="${build.dir}">
-            <fileset dir="./build/production/EdiromOnline/"/>
+            <fileset dir="build/production/EdiromOnline/"/>
         </copy>
         <copy todir="${build.dir}">
             <file file="build.xml"/>
             <file file="expath-pkg.xml"/>
         </copy>
+        <delete dir="build/production/"></delete>
     </target>
     
     <target name="sencha">
