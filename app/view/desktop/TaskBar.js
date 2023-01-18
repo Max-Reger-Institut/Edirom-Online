@@ -38,11 +38,12 @@ Ext.define('EdiromOnline.view.desktop.TaskBar', {
         var me = this;
 
         me.addEvents('switchDesktop',
-                    'sortGrid', 
-                    'sortHorizontally', 
-                    'sortVertically', 
-                    'openConcordanceNavigator', 
-                    'openSearchWindow');
+                    'sortGrid',
+                    'sortHorizontally',
+                    'sortVertically',
+                    'openConcordanceNavigator',
+                    'openSearchWindow',
+                    'switchLanguage');
 
         me.windowSort = new Ext.toolbar.Toolbar(me.getWindowSortConfig());
         me.globalTools = new Ext.toolbar.Toolbar(me.getGlobalToolsConfig());
@@ -72,7 +73,7 @@ Ext.define('EdiromOnline.view.desktop.TaskBar', {
             me.windowBar3,
             me.windowBar4,
             '-',
-            me.helpPrefs,
+            //me.helpPrefs,
             me.tray
         ];
 
@@ -219,6 +220,14 @@ Ext.define('EdiromOnline.view.desktop.TaskBar', {
             //handler: Ext.bind(me.fireEvent, me, ['openConcordanceNavigator'], false)
         });
 
+        me.langButton = Ext.create('Ext.button.Button', {
+            id: 'langBtn',
+            cls: 'taskSquareButton lang',
+            tooltip: { text: getLangString('view.desktop.TaskBar_lang'), align: 'bl-tl' },
+            handler: Ext.bind(me.fireEvent, me, ['switchLanguage'], false)
+        });
+
+    
         me.helpButton = Ext.create('Ext.button.Button', {
             id: 'helpBtn',
             cls: 'taskSquareButton help',
@@ -227,9 +236,10 @@ Ext.define('EdiromOnline.view.desktop.TaskBar', {
         });
 
         return {
-            width: 32,//64,
+            width: 64,
             items: [
-                me.helpButton/*,
+                me.helpButton,
+                me.langButton/*,
                 me.prefButton*/
             ]
         };

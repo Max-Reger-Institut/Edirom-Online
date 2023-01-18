@@ -25,6 +25,7 @@ xquery version "1.0";
 : This module provides library functions for Sources
 :
 : @author <a href="mailto:roewenstrunk@edirom.de">Daniel Röwenstrunk</a>
+: @author <a href="mailto:bohl@edirom.de">Benjamin W. Bohl</a>
 :)
 
 module namespace source = "http://www.edirom.de/xquery/source";
@@ -33,15 +34,19 @@ import module namespace console="http://exist-db.org/xquery/console";
 
 declare namespace mei="http://www.music-encoding.org/ns/mei";
 
+import module namespace eutil="http://www.edirom.de/xquery/util" at "../xqm/util.xqm";
+
 (:~
-: Returns whether a document is a work or not
+: Returns whether a document is a source or not
 :
 : @param $uri The URI of the document
 : @return Is work or not
 :)
 declare function source:isSource($uri as xs:string) as xs:boolean {
-    
-    exists(doc($uri)//mei:mei) and exists(doc($uri)//mei:source)
+    let $doc := eutil:getDoc($uri)
+    return
+        exists($doc//mei:mei) and exists($doc//mei:source) (:mei2 and ?3 :)
+        or ($doc//mei:mei/@meiversion = ("4.0.0", "4.0.1") and exists($doc//mei:manifestation[@singleton='true'])) (:mei4 :)
 };
 
 (:~
@@ -50,9 +55,9 @@ declare function source:isSource($uri as xs:string) as xs:boolean {
 : @param $sources The URIs of the Sources' documents to process
 : @return The labels
 :)
-declare function source:getLabels($sources as xs:string*) as xs:string {
+declare function source:getLabels($sources as xs:string*, $edition as xs:string) as xs:string {
     string-join(
-        for $source in $sources return source:getLabel($source)
+        for $source in $sources return source:getLabel($source, $edition)
     , ', ')
 };
 
@@ -62,9 +67,21 @@ declare function source:getLabels($sources as xs:string*) as xs:string {
 : @param $source The URIs of the Source's document to process
 : @return The label
 :)
-declare function source:getLabel($source as xs:string) as xs:string {
-     
-    doc($source)//mei:source/mei:titleStmt/data(mei:title[1])
+declare function source:getLabel($source as xs:string, $edition as xs:string) as xs:string {
+    let $sourceDoc := doc($source)
+    let $language := eutil:getLanguage($edition)
+    let $label := if($sourceDoc/mei:mei/@meiversion = ("4.0.0", "4.0.1"))(:TODO encoding of source labels may heavily differ in certain encoding contexts, thus introduction of class="http://www.edirom.de/edirom-online/source/label":)
+                    then $sourceDoc//mei:manifestation[@singleton='true']/mei:titleStmt/mei:title[@class = "http://www.edirom.de/edirom-online/source/label"][not(@xml:lang) or @xml:lang = $language]
+                    else $sourceDoc//mei:source/mei:titleStmt/mei:title[not(@xml:lang) or @xml:lang = $language]
+    let $label := if($label)
+                    then($label)
+                    else(doc($source)//mei:meiHead/mei:fileDesc/mei:titleStmt/mei:title[not(@xml:lang) or @xml:lang = $language])
+    let $label := if($label)
+                    then($label)
+                    else('unknown title')
+    return
+        string($label)
+
 };
 
 (:~
@@ -99,6 +116,8 @@ declare function source:getSiglaAsArray($sources as xs:string*) as xs:string* {
 : @return The siglum
 :)
 declare function source:getSiglum($source as xs:string) as xs:string? {
-     
-    doc($source)//mei:source/mei:identifier[@type eq 'siglum'][1]//text()
+    let $doc := doc($source)
+    let $elems := $doc//mei:*[@type eq 'siglum']
+    let $siglum := if(exists($elems)) then($elems[1]//text()) else()
+    return $siglum
 };

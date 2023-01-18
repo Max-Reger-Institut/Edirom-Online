@@ -24,5 +24,7 @@
     <entries>
         <entry key="application_language" value="de"/>
         <entry key="annotation_layout" value="EdiromOnline.view.window.annotationLayouts.AnnotationLayout1"/>
+        <entry key="image_server" value="digilib"/>
+        <entry key="start_documents_uri" value=""/>
     </entries>
 </prefs>

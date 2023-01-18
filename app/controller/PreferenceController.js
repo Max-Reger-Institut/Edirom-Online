@@ -75,6 +75,10 @@ Ext.define('EdiromOnline.controller.PreferenceController', {
 		        return "en";
 	        }
         }
+        
+        if(me.preferences[key] == "" && key == "image_prefix") {
+            return "";
+        }
 
         if(!me.preferences[key]) {
             Ext.Error.raise({
@@ -93,5 +97,4 @@ Ext.define('EdiromOnline.controller.PreferenceController', {
     getURLParameter: function(parameter) {
         return decodeURIComponent((new RegExp('[?|&]' + parameter + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search) || [null, ''])[1].replace(/\+/g, '%20')) || null;
     }
-
 });

@@ -31,6 +31,7 @@ module namespace edition = "http://www.edirom.de/xquery/edition";
 declare namespace edirom="http://www.edirom.de/ns/1.3";
 declare namespace xlink="http://www.w3.org/1999/xlink";
 
+import module namespace functx="http://www.functx.com";
 (:~
 : Returns a JSON representation of an Edition
 :
@@ -45,8 +46,19 @@ declare function edition:toJSON($uri as xs:string) as xs:string {
             {',
                 'id: "', $edition/string(@xml:id), '", ',
                 'doc: "', $uri, '", ',
-                'name: "', if ($edition/edirom:editionName/*) then ('Edirom Edition') else ($edition/edirom:editionName), '"',
+                'name: "', $edition/edirom:editionName, '"',
             '}')
+};
+
+(:~
+: Returns a list of URIs pointing to Editions
+:
+: @return The list of URIs
+:)
+declare function edition:getUris() as xs:string* {
+    
+    for $edition in collection('/db/apps')//edirom:edition
+    return 'xmldb:exist://' || document-uri($edition/root())
 };
 
 (:~
@@ -84,12 +96,47 @@ declare function edition:getPreferencesURI($uri as xs:string) as xs:string {
 };
 
 (:~
-: Returns the URI of the first found Edition
+: Returns the URI of the edition specified by the submitted $editionID parameter.
+: Only succeeds if the supplied id is the @xml:id of a edirom:edition element in '/db/apps'.
+: If $editionID is the empty string, returns the URI of the first edition found in '/db/apps'.
+:
+: @param $editionID The '@xml:id' of the edirom:edition document to process
+: @return The URI of the Edition file
+:)
+declare function edition:findEdition($editionID as xs:string) as xs:string {
+    if($editionID eq '')
+    then(
+        let $edition := (collection('/db/apps')//edirom:edition)[1]
+        return 'xmldb:exist://' || document-uri($edition/root())
+    )
+    else (
+        let $edition := collection('/db/apps')//edirom:edition/id($editionID)
+        return 'xmldb:exist://' || document-uri($edition/root())
+    )
+};
+
+(:~
+: Returns the name of the edition specified by $uri
 :
 : @param $uri The URI of the Edition's document to process
-: @return The URI
+: @return the text contents of edirom:edition/edirom:editionName
 :)
-declare function edition:findEdition() as xs:string {
-    let $edition := (collection('/db/apps')//edirom:edition)[1]
-    return 'xmldb:exist://' || document-uri($edition/root())
+declare function edition:getName($uri as xs:string) as xs:string {
+  doc($uri)/edirom:edition/edirom:editionName/text()
+};
+
+(:~
+: Returns the frontend URI of the edition, e.g. if the edirom:edition file
+: submitted via $editionUri is xmldb:exist///db/apps/editionFolder/edition.xml
+: and the $contextPath is /exist the string returned woud be /exist/apps/editionFolder
+:
+: @param $editionUri The xmldb-collection-path of the edition
+: @param $contextPath the request:get-context-path() of the frontend
+:
+: @return xs:string
+:)
+declare function edition:getFrontendUri($editionUri as xs:string, $contextPath as xs:string) as xs:string {
+    let $editionContext := functx:substring-before-last(substring-after($editionUri, 'xmldb:exist:///db/'), '/')
+    return
+        string-join(($contextPath, $editionContext), '/')
 };

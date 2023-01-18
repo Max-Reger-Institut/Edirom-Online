@@ -20,9 +20,10 @@ Ext.define('EdiromOnline.Application', {
     name: 'EdiromOnline',
 
     extend: 'Ext.app.Application',
-
+    
     controllers: [
         'AJAXController',
+        'CookieController',
         'LanguageController',
         'PreferenceController',
         'ToolsController',
@@ -60,13 +61,14 @@ Ext.define('EdiromOnline.Application', {
         'EdiromOnline.view.desktop.App'
     ],
     
-    //TODO:
     activeEdition: '',
     activeWork: '', 
 
     launch: function() {
         var me = this;
-       
+        
+        window.getActiveEdition = Ext.bind(this.getActiveEdition, this);
+
         me.addEvents('workSelected');
         
         var editionParam = me.getURLParameter('edition');
@@ -103,7 +105,8 @@ Ext.define('EdiromOnline.Application', {
         });
         
         me.getController('PreferenceController').initPreferences(me.activeEdition);
-        me.getController('LanguageController').initLangFile(me.activeEdition);
+        me.getController('LanguageController').initLangFile(me.activeEdition, 'de');
+        me.getController('LanguageController').initLangFile(me.activeEdition, 'en');
         me.initDataStores();
 
         var app = Ext.create('EdiromOnline.view.desktop.App', {app: this});
@@ -123,6 +126,8 @@ Ext.define('EdiromOnline.Application', {
                 urlParams.uri = urlParams.uri + window.location.hash; 
         
             app.on('ready', Ext.bind(window.loadLink, me, [urlParams.uri, {sort:'sortGrid'}], false), me, {single: true});
+        }else {
+            app.on('ready', Ext.bind(me.openStartDocuments, me), me, {single: true});
         }
     },
     
@@ -145,6 +150,16 @@ Ext.define('EdiromOnline.Application', {
         works.load();
     },
     
+    getActiveEdition: function() {
+        return this.activeEdition;
+    },
+    
+    selectEdition: function(editionId) {
+        this.activeEdition = editionId;
+        this.fireEvent('editionSelected', editionId);
+        window.open(window.location.pathname + '?edition=' + editionId, "_self");
+    },
+    
     selectWork: function(workId) {
         this.activeWork = workId;
         this.fireEvent('workSelected', workId);
@@ -163,5 +178,11 @@ Ext.define('EdiromOnline.Application', {
 	
 	getURLParameter: function(parameter) {
         return decodeURIComponent((new RegExp('[?|&]' + parameter + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search) || [null, ''])[1].replace(/\+/g, '%20')) || null;
+    },
+    
+    openStartDocuments: function() {
+        var me = this;
+        var uris = me.getController('PreferenceController').getPreference('start_documents_uri');
+        window.loadLink(uris);
     }
 });

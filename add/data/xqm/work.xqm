@@ -28,6 +28,8 @@ xquery version "3.0";
 :)
 module namespace work = "http://www.edirom.de/xquery/work";
 
+import module namespace eutil="http://www.edirom.de/xquery/util" at "../xqm/util.xqm";
+
 declare namespace mei="http://www.music-encoding.org/ns/mei";
 declare namespace edirom="http://www.edirom.de/ns/1.3";
 
@@ -61,9 +63,10 @@ declare function local:getLocalizedTitle($node) {
 : @param $uri The URI of the Work's document to process
 : @return The JSON representation
 :)
-declare function work:toJSON($uri as xs:string) as xs:string {
+declare function work:toJSON($uri as xs:string, $edition as xs:string) as xs:string {
     
     let $work := doc($uri)/mei:mei
+    let $lang := request:get-parameter('lang', '')
     return
         concat('
             {',
@@ -88,12 +91,13 @@ declare function work:isWork($uri as xs:string) as xs:boolean {
 (:~
 : Returns a works's label
 :
-: @param $source The URIs of the Work's document to process
+: @param $work The URIs of the Work's document to process
+: @param $edition The ID of the Edition the Work is part of
 : @return The label
 :)
-declare function work:getLabel($work as xs:string) as xs:string {
+declare function work:getLabel($work as xs:string, $edition as xs:string) as xs:string {
      
-    local:getLocalizedTitle(doc($work)//mei:work/mei:titleStmt)
+    eutil:getLocalizedTitle(doc($work)//mei:work, request:get-parameter('lang', ''))
 };
 
 (:~

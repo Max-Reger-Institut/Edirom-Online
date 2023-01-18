@@ -41,6 +41,7 @@ Ext.define('EdiromOnline.view.window.source.SourceView', {
     measuresVisibilitySetLocaly: false,
     annotationsVisible: false,
     annotationsVisibilitySetLocaly: false,
+    overlaysVisible: {},
     
     cls: 'sourceView',
     
@@ -236,6 +237,8 @@ Ext.define('EdiromOnline.view.window.source.SourceView', {
     setOverlays: function(overlays) {
         var me = this;
 
+        if(overlays.count() == 0) return;
+
         me.overlays = overlays;
 
         var overlayItems = [];
@@ -259,17 +262,9 @@ Ext.define('EdiromOnline.view.window.source.SourceView', {
 
     overlayVisibilityChanged: function(item, event) {
         var me = this;
+        
+        me.overlaysVisible[item.overlayId] = item.checked;        
         me.fireEvent('overlayVisiblityChange', me, item.overlayId, item.checked);
-    },
-
-    hideOverlay: function(overlayId) {
-        var me = this;
-        me.pageBasedView.hideOverlay(overlayId);
-    },
-
-    showOverlay: function(overlayId, overlay) {
-        var me = this;
-        me.pageBasedView.showOverlay(overlayId, overlay);
     },
 
     getImageSet: function() {
@@ -283,7 +278,7 @@ Ext.define('EdiromOnline.view.window.source.SourceView', {
         var me = this;
 
         me.pageBasedView.setPage(combo, store);
-
+        
         if(me.measuresVisible)
             this.fireEvent('measureVisibilityChange', me, true);
 
@@ -293,7 +288,6 @@ Ext.define('EdiromOnline.view.window.source.SourceView', {
 
     showPage: function(pageId) {
         var me = this;
-
         me.pageBasedView.showPage(pageId);
     },
 
@@ -389,13 +383,21 @@ Ext.define('EdiromOnline.view.window.source.SourceView', {
         me.bottomBar.add({xtype:'tbseparator'});
 
         var entries = me.pageBasedView.createToolbarEntries();
+
+		var image_server = getPreference('image_server');
+
         Ext.Array.each(entries, function(entry) {
-            me.bottomBar.add(entry);        
+			if(image_server === 'digilib' || image_server === 'openseadragon'){
+				me.bottomBar.add(entry);    
+			}
+			else if(entry.initialCls !== 'zoomSlider' && entry.xtype !== 'tbseparator'){
+				me.bottomBar.add(entry);  
+			}      
         });
         
         entries = me.measureBasedView.createToolbarEntries();
-        Ext.Array.each(entries, function(entry) {
-            me.bottomBar.add(entry);        
+        Ext.Array.each(entries, function(entry) {			
+				me.bottomBar.add(entry);     
         });
     },
 
@@ -438,7 +440,7 @@ Ext.define('EdiromOnline.view.window.source.SourceView', {
         var me = this;
         me.measuresVisible = state;
         me.measuresVisibilitySetLocaly = true;
-
+        
         this.fireEvent('measureVisibilityChange', me, state);
     },
 
@@ -459,7 +461,8 @@ Ext.define('EdiromOnline.view.window.source.SourceView', {
             movements: me.movements,
             callback: Ext.bind(function(measure, movementId) {
                 this.fireEvent('gotoMeasureByName', this, measure, movementId);
-            }, me)
+            }, 
+            me)
         }).show();
     },
 
@@ -469,10 +472,12 @@ Ext.define('EdiromOnline.view.window.source.SourceView', {
 
     showMeasure: function(movementId, measureId, measureCount) {
         var me = this;
+       
         if(me.activeView !== 'measureBasedView')
-            me.switchInternalView('measureBasedView');
-            
+        	me.switchInternalView('measureBasedView');
+       
         me.measureBasedView.showMeasure(movementId, measureId, measureCount);
+   
     },
     
     gotoZone: function(zoneId) {
