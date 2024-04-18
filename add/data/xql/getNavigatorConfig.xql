@@ -30,6 +30,7 @@ declare namespace xlink="http://www.w3.org/1999/xlink";
 declare namespace conf="https://www.maxreger.info/conf";
 
 declare namespace xmldb="http://exist-db.org/xquery/xmldb";
+import module namespace functx = "http://www.functx.com" at "../xqm/functx-1.0-nodoc-2007-01.xq";
 
 declare option exist:serialize "method=xhtml media-type=text/html omit-xml-declaration=yes indent=yes";
 
@@ -38,7 +39,7 @@ declare variable $lang := request:get-parameter('lang', '');
 declare variable $configResource := doc('xmldb:exist:///db/apps/mriExistDBconf/config.xml');
 declare variable $env := $configResource//conf:env/text();
 
-declare function local:getCategory($category, $depth) {
+declare function local:getCategory($category, $depth, $editionId, $workId) {
 
 
     <div class="navigatorCategory{if($depth = 1)then()else($depth)}" id="{$category/@xml:id}">
@@ -60,7 +61,7 @@ declare function local:getCategory($category, $depth) {
                 then(
                     if ($env = ('beta', 'public') and ($elem/@type = 'private' or matches($elem/@targets/string(), '(/music/editions/|/music/mused/)')))
                     then ()
-                    else (local:getItem($elem, $depth))
+                    else (local:getItem($elem, $depth, $editionId, $workId))
                 )
                 else if(local-name($elem) eq 'navigatorSeparator')
                 then(
@@ -68,7 +69,7 @@ declare function local:getCategory($category, $depth) {
                 )
                 else if(local-name($elem) eq 'navigatorCategory')
                 then(
-                    local:getCategory($elem, $depth + 1)
+                    local:getCategory($elem, $depth + 1, $editionId, $workId)
                 )
                 else()
         }
@@ -76,7 +77,7 @@ declare function local:getCategory($category, $depth) {
     </div>
 };
 
-declare function local:getItem($item, $depth) {
+declare function local:getItem($item, $depth, $editionId, $workId) {
 
     let $target := $item/replace(@targets, '\[.*\]', '')
     
@@ -94,10 +95,18 @@ declare function local:getItem($item, $depth) {
     (: RWA specific implementation, ends here. :)
     
     let $cfg := concat('{', replace(substring-before($item/substring-after(@targets, '['), ']'), '=', ':'), '}')
+    
+    let $configResource := doc('xmldb:exist:///db/apps/mriExistDBconf/config.xml')
+    let $mrpUrl := $configResource//conf:mrpURL
+    let $sourceId := substring-before(functx:substring-after-last($target, '/'), '.xml')
+    let $getEdiromNavigatorTitleUrl := concat($mrpUrl, '/cat/rest/getEdiromNavigatorTitle.xql?editionID=', $editionId ,'&amp;workID=', $workId, '&amp;sourceID=', $sourceId, '&amp;lang=', $lang)
+    
     return
 
     <div class="navigatorItem{if($depth lt 2)then()else($depth)}" id="{$item/@xml:id}" onclick="loadLink('{$target}', {$cfg})">
-        {eutil:getLocalizedName($item, $lang) }
+        { eutil:getLocalizedName($item, $lang) }
+        {(: <div>{$editionId}--{$workId}-{$sourceId}</div> :)}
+        <div style="color: red; font-size: 80%;">{ if (contains($target, 'sources/')) then (hc:send-request(<hc:request href="{$getEdiromNavigatorTitleUrl}" method="get"/>)) else () }</div>
     </div>
 };
 
@@ -106,7 +115,7 @@ declare function local:getSeparator() {
     <div class="navigatorSeparator"></div>
 };
 
-declare function local:getDefinition($navConfig, $edition) {
+declare function local:getDefinition($navConfig, $edition, $editionId, $workId) {
     let $elems := $navConfig/*
     let $identModule := $edition//edirom:identifier[@type = 'module']
     let $moduleName := 
@@ -125,7 +134,7 @@ declare function local:getDefinition($navConfig, $edition) {
             return
                 if(local-name($elem) eq 'navigatorItem')
                 then(
-                    local:getItem($elem, 1)
+                    local:getItem($elem, 1, $editionId, $workId)
                 )
                 else if(local-name($elem) eq 'navigatorSeparator')
                 then(
@@ -134,7 +143,7 @@ declare function local:getDefinition($navConfig, $edition) {
                 else if(local-name($elem) eq 'navigatorCategory')
                 then(
                     (: check if there are any items in category to show, dependig on (RWA) rules defined in local:getDefinition :)
-                    let $category := local:getCategory($elem, 1)
+                    let $category := local:getCategory($elem, 1, $editionId, $workId)
                     return
                         if ($category//div[starts-with(./@class, 'navigatorItem')])
                         then ($category)
@@ -144,11 +153,12 @@ declare function local:getDefinition($navConfig, $edition) {
         )
 };
 
-let $editionId := request:get-parameter('editionId', '')
+let $editionUrl := request:get-parameter('editionId', '')
 let $workId := request:get-parameter('workId', '')
-let $edition := doc($editionId)/root()
+let $edition := doc($editionUrl)/root()
+let $editionId := $edition//edirom:edition/@xml:id/string()
 let $work := $edition/id($workId)
 let $navConfig := $work/edirom:navigatorDefinition
 
 return
-    local:getDefinition($navConfig, $edition)
+    local:getDefinition($navConfig, $edition, $editionId, $workId)
