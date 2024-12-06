@@ -78,7 +78,7 @@ Ext.define('EdiromOnline.controller.window.source.MeasureBasedView', {
                 var data = response.responseText;
 
                 var measures = Ext.create('Ext.data.Store', {
-                    fields: ['id', 'measures', 'name', 'mdivs'],
+                    fields: ['id', 'measures', 'name', 'mdivs', 'disclaimer'],
                     data: Ext.JSON.decode(data)
                 });
 

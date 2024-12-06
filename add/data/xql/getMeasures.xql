@@ -32,7 +32,9 @@ declare option exist:serialize "method=text media-type=text/plain omit-xml-decla
 
 declare function local:getMeasures($mei as node(), $mdivID as xs:string) as xs:string* {
     
-    if($mei//mei:parts)
+    let $disclaimer := $mei//mei:pubStmt//mei:useRestrict[@type = 'disclaimer']/string() => replace('\n', '<br>')
+    
+    return if($mei//mei:parts)
     then(
         let $mdiv := $mei/id($mdivID)
         let $measuresNotDel := $mdiv//mei:measure[not(parent::mei:del)] (: all measures except those which are surrounded by <del> :)
@@ -87,7 +89,8 @@ declare function local:getMeasures($mei as node(), $mdivID as xs:string) as xs:s
                 'id: "measure_', $mdiv/@xml:id, '_', $mentionedMeasureLabel, '", ',
                 'measures: [', string-join($resultMeasures, ','), '], ',
                 'mdivs: ["', $mdiv/@xml:id, '"], ', (: TODO :)
-                'name: "', $mentionedMeasureLabel, '"',
+                'name: "', $mentionedMeasureLabel, '", ',
+                'disclaimer: "', $disclaimer, '"',
             '}')
     )
     (: no <part>s :)
@@ -99,7 +102,8 @@ declare function local:getMeasures($mei as node(), $mdivID as xs:string) as xs:s
                 'id: "', $measure/@xml:id, '", ',
                 'measures: [{id:"', $measure/@xml:id, '", voice: "score"}], ',
                 'mdivs: ["', $measure/ancestor::mei:mdiv[1]/@xml:id, '"], ', (: TODO :)
-                'name: "', functx:substring-before-if-contains(functx:substring-after-if-contains($measureLabel, '('), ')'), '"', (: Hier Unterscheiden wg. Auftakt. :)
+                'name: "', functx:substring-before-if-contains(functx:substring-after-if-contains($measureLabel, '('), ')'), '", ', (: Hier Unterscheiden wg. Auftakt. :)
+                'disclaimer: "', $disclaimer, '"',
             '}')
     )
 };

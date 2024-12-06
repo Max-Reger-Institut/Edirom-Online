@@ -47,6 +47,7 @@ Ext.define('EdiromOnline.view.window.image.ImageViewer', {
     shapes: null,
     shapesHidden: false,
     partLabel: null,
+    disclaimer: null,
 
     svgOverlays: null,
     
@@ -67,19 +68,21 @@ Ext.define('EdiromOnline.view.window.image.ImageViewer', {
                     'imageChanged');
        
 /*       from OPERA*/
-       var facsContEvents;
-
+        var facsContEvents;
+        
+        facsContEvents = '<div id="' + me.id + '_facsContEvents" class="facsContEvents">';
         if (me.partLabel != null) {
-         facsContEvents = '<div id="' + me.id + '_facsContEvents" class="facsContEvents">' +
-            '<div  id="' + me.id + '_' + me.partLabel + '" class="part">' +
-              '<span class="partInner" id="' + me.id + '_' + me.partLabel + '_inner">' +
-              me.partLabel + '</span>' +
-            '</div>' +
-         '</div>';
+            facsContEvents += 
+                '<div  id="' + me.id + '_' + me.partLabel + '" class="part">' +
+                  '<span class="partInner" id="' + me.id + '_' + me.partLabel + '_inner">' +
+                  me.partLabel + '</span>' +
+                '</div>';
         }
-        else {
-          facsContEvents = '<div id="' + me.id + '_facsContEvents" class="facsContEvents"></div>';
-         };
+        facsContEvents +=
+            '<div id="' + me.id + '_disclaimer" class="disclaimer">' +
+              '<span class="disclaimerInner" id="' + me.id + '_disclaimer_inner"></span>' +
+            '</div>';
+        facsContEvents += '</div>';
          
         me.html = '<div id="' + me.id + '_facsCont" style="background-color: black; top:0px; bottom: 0px; left: 0px; right: 0px; position:absolute;"></div>' + facsContEvents;
 
@@ -109,6 +112,21 @@ Ext.define('EdiromOnline.view.window.image.ImageViewer', {
         eventEl.unselectable();
         eventEl.on('mousedown', me.onMouseDown, me);
         eventEl.on('mousewheel', me.onScroll, me);
+        
+        if (me.disclaimer != null) {
+            me.setDisclaimer(me.disclaimer);
+        }
+    },
+    
+    setDisclaimer: function(disclaimer) {
+        var me = this;
+        
+        var el = document.getElementById(me.id + '_disclaimer_inner');
+        
+        me.disclaimer = disclaimer;         
+        
+        el.innerHTML = me.disclaimer;
+        el.style.visibility = me.disclaimer ? 'visible' : 'hidden';
     },
 
     showImage: function(path, width, height, pageId, rotate) {

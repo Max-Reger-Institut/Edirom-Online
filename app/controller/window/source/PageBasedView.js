@@ -50,7 +50,7 @@ Ext.define('EdiromOnline.controller.window.source.PageBasedView', {
                 var data = response.responseText;
 
                 var pages = Ext.create('Ext.data.Store', {
-                    fields: ['id', 'name', 'path', 'width', 'height', 'measures', 'annotations'],
+                    fields: ['id', 'name', 'path', 'width', 'height', 'measures', 'annotations', 'disclaimer'],
                     data: Ext.JSON.decode(data)
                 });
 

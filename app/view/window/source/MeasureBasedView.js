@@ -210,6 +210,7 @@ Ext.define('EdiromOnline.view.window.source.MeasureBasedView', {
 
         var id = combo.getValue();
         var measures = store.getById(id);
+        var disclaimer = measures.get('disclaimer');
         
         Ext.Array.each(measures.get('measures'), function(m) {
             
@@ -223,7 +224,8 @@ Ext.define('EdiromOnline.view.window.source.MeasureBasedView', {
                 if(typeof viewer == 'undefined') {
                     viewer = Ext.create('EdiromOnline.view.window.source.HorizontalMeasureViewer', {
                         owner: me,
-                        partLabel: partLabel
+                        partLabel: partLabel,
+                        disclaimer: disclaimer
                     });
                     
                     me.viewers.add(voice, viewer);
@@ -382,6 +384,7 @@ Ext.define('EdiromOnline.view.window.source.HorizontalMeasureViewer', {
     border: false,
     
     partLabel: '',
+    disclaimer: '',
     
     style: {
         borderColor: 'black',
@@ -404,7 +407,7 @@ Ext.define('EdiromOnline.view.window.source.HorizontalMeasureViewer', {
         me.owner.owner.on('measureVisibilityChange', me.onMeasureVisibilityChange, me);
         me.owner.owner.on('annotationsVisibilityChange', me.onAnnotationsVisibilityChange, me);
         
-        var viewer = Ext.create('EdiromOnline.view.window.image.ImageViewer', {flex: 1, partLabel: me.partLabel});
+        var viewer = Ext.create('EdiromOnline.view.window.image.ImageViewer', {flex: 1, partLabel: me.partLabel, disclaimer: me.disclaimer});
         viewer.on('imageChanged', me.onViewerImageChange, me);
         
         me.imageViewers = [viewer];
@@ -507,7 +510,7 @@ Ext.define('EdiromOnline.view.window.source.HorizontalMeasureViewer', {
             
             if(typeof me.imageViewers[viewerCount - 1] == 'undefined') {
             
-                var viewer = Ext.create('EdiromOnline.view.window.image.ImageViewer', {flex: 1});
+                var viewer = Ext.create('EdiromOnline.view.window.image.ImageViewer', {flex: 1, disclaimer: me.disclaimer});
                 viewer.on('imageChanged', me.onViewerImageChange, me);
             
                 me.imageViewers[viewerCount - 1] = viewer;
