@@ -72,7 +72,8 @@ Ext.define('EdiromOnline.controller.window.source.MeasureBasedView', {
             method: 'GET',
             params: {
                 uri: view.owner.uri,
-                mdiv: mdiv
+                mdiv: mdiv, 
+                lang: getPreference('application_language')
             },
             success: function(response){
                 var data = response.responseText;

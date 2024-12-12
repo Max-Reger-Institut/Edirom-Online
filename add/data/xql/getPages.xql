@@ -32,9 +32,10 @@ declare namespace xmldb="http://exist-db.org/xquery/xmldb";
 declare option exist:serialize "method=text media-type=text/plain omit-xml-declaration=yes";
 
 let $uri := request:get-parameter('uri', '')
+let $lang := request:get-parameter('lang', 'en')
 let $mei := eutil:getDoc($uri)/root()
 
-let $disclaimer := $mei//mei:pubStmt//mei:useRestrict[@type = 'disclaimer']/string() => replace('\n', '<br>')
+let $disclaimer := $mei//mei:pubStmt//mei:useRestrict[@type = 'disclaimer'][if (./@xml:lang) then (./@xml:lang = $lang) else (.)]/string() => replace('\n', '<br>')
 
 let $ret := for $surface in $mei//mei:surface
             (:let $image := doc($surface/mei:graphic[@type='facsimile']/string(@target))/img:image:)

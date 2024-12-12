@@ -30,9 +30,9 @@ import module namespace console="http://exist-db.org/xquery/console";
 
 declare option exist:serialize "method=text media-type=text/plain omit-xml-declaration=yes";
 
-declare function local:getMeasures($mei as node(), $mdivID as xs:string) as xs:string* {
+declare function local:getMeasures($mei as node(), $mdivID as xs:string, $lang as xs:string) as xs:string* {
     
-    let $disclaimer := $mei//mei:pubStmt//mei:useRestrict[@type = 'disclaimer']/string() => replace('\n', '<br>')
+    let $disclaimer := $mei//mei:pubStmt//mei:useRestrict[@type = 'disclaimer'][if (./@xml:lang) then (./@xml:lang = $lang) else (.)]/string() => replace('\n', '<br>')
     
     return if($mei//mei:parts)
     then(
@@ -110,8 +110,9 @@ declare function local:getMeasures($mei as node(), $mdivID as xs:string) as xs:s
 
 let $uri := request:get-parameter('uri', '')
 let $mdivID := request:get-parameter('mdiv', '')
+let $lang := request:get-parameter('lang', 'en')
 let $mei := doc($uri)/root()
 
-let $ret := local:getMeasures($mei, $mdivID)
+let $ret := local:getMeasures($mei, $mdivID, $lang)
 
 return concat('[', string-join($ret, ','), ']')

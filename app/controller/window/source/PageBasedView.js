@@ -44,7 +44,8 @@ Ext.define('EdiromOnline.controller.window.source.PageBasedView', {
             url: 'data/xql/getPages.xql',
             method: 'GET',
             params: {
-                uri: view.owner.uri
+                uri: view.owner.uri,
+                lang: getPreference('application_language')
             },
             success: function(response){
                 var data = response.responseText;
