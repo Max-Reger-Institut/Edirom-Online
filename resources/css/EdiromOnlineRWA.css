@@ -36,6 +36,13 @@ span.uline {
     text-decoration: underline;
 }
 
+.annotView .previewArea .previewItem .imgBox {
+    bottom: 40px;
+}
+
+.annotView .previewArea .previewItem .label {
+    height: 32px;
+}
 
 span.title {
     font-style: italic;
