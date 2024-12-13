@@ -72,13 +72,14 @@ Ext.define('EdiromOnline.controller.window.source.MeasureBasedView', {
             method: 'GET',
             params: {
                 uri: view.owner.uri,
-                mdiv: mdiv
+                mdiv: mdiv, 
+                lang: getPreference('application_language')
             },
             success: function(response){
                 var data = response.responseText;
 
                 var measures = Ext.create('Ext.data.Store', {
-                    fields: ['id', 'measures', 'name', 'mdivs'],
+                    fields: ['id', 'measures', 'name', 'mdivs', 'disclaimer'],
                     data: Ext.JSON.decode(data)
                 });
 

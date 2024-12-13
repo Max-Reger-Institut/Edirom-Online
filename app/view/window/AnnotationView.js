@@ -460,7 +460,7 @@ Ext.define('EdiromOnline.view.window.AnnotationView', {
         tplImg.compile();
 
         var tplText = dh.createTemplate({tag:'div', cls: 'previewItem',
-            html:'<div id="{0}" class="txtBox">{1}</div><div class="label">{2}</div>'});
+            html:'<div id="{0}" class="txtBox">{1}</div><div class="label">s{2}</div>'});
         tplText.compile();
 
         var elems = new Array();
@@ -479,6 +479,7 @@ Ext.define('EdiromOnline.view.window.AnnotationView', {
             var page = participant['page'];
             var source = participant['source'];
             var siglum = participant['siglum'];
+            var disclaimer = participant['disclaimer'];
             var part = participant['part'];
             // var digilibBaseParams = participant['digilibBaseParams'];
             // var digilibSizeParams = participant['digilibSizeParams'];
@@ -487,6 +488,7 @@ Ext.define('EdiromOnline.view.window.AnnotationView', {
             var content = participant['content'];
 
             label = (siglum == ''?source:siglum) + (part == ''?'':', '+part);//  + ": " + label;
+            label = disclaimer == '' ? label : label + '<div style="font-size: smaller;">'+disclaimer+'</div>';
 
             if(type == 'text') {
 

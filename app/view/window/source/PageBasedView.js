@@ -33,11 +33,12 @@ Ext.define('EdiromOnline.view.window.source.PageBasedView', {
     imageSet: null,
     imageToShow: null,
     
+    disclaimer: null,
+    
     cls: 'pageBasedView',
 
     initComponent: function () {
-
-        this.imageViewer = Ext.create('EdiromOnline.view.window.image.ImageViewer');
+        this.imageViewer = Ext.create('EdiromOnline.view.window.image.ImageViewer', {disclaimer: this.disclaimer});
 
         this.items = [
             this.imageViewer
@@ -105,6 +106,7 @@ Ext.define('EdiromOnline.view.window.source.PageBasedView', {
 
         me.imageViewer.showImage(me.activePage.get('path'),
             me.activePage.get('width'), me.activePage.get('height'));
+        me.imageViewer.setDisclaimer(me.activePage.get('disclaimer'));
             
         if(me.owner.measuresVisible)
             me.owner.fireEvent('measureVisibilityChange', me.owner, true);

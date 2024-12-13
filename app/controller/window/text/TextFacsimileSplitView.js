@@ -54,7 +54,8 @@ Ext.define('EdiromOnline.controller.window.text.TextFacsimileSplitView', {
             url: 'data/xql/getPages.xql',
             method: 'GET',
             params: {
-                uri: uri
+                uri: uri,
+                lang: getPreference('application_language')
             },
             success: function(response){
                 var data = response.responseText;

@@ -47,6 +47,7 @@ Ext.define('EdiromOnline.view.window.image.ImageViewer', {
     shapes: null,
     shapesHidden: false,
     partLabel: null,
+    disclaimer: null,
 
     svgOverlays: null,
     
@@ -67,19 +68,21 @@ Ext.define('EdiromOnline.view.window.image.ImageViewer', {
                     'imageChanged');
        
 /*       from OPERA*/
-       var facsContEvents;
-
+        var facsContEvents;
+        
+        facsContEvents = '<div id="' + me.id + '_facsContEvents" class="facsContEvents">';
         if (me.partLabel != null) {
-         facsContEvents = '<div id="' + me.id + '_facsContEvents" class="facsContEvents">' +
-            '<div  id="' + me.id + '_' + me.partLabel + '" class="part">' +
-              '<span class="partInner" id="' + me.id + '_' + me.partLabel + '_inner">' +
-              me.partLabel + '</span>' +
-            '</div>' +
-         '</div>';
+            facsContEvents += 
+                '<div  id="' + me.id + '_' + me.partLabel + '" class="part">' +
+                  '<span class="partInner" id="' + me.id + '_' + me.partLabel + '_inner">' +
+                  me.partLabel + '</span>' +
+                '</div>';
         }
-        else {
-          facsContEvents = '<div id="' + me.id + '_facsContEvents" class="facsContEvents"></div>';
-         };
+        facsContEvents +=
+            '<div id="' + me.id + '_disclaimer" class="disclaimer">' +
+              '<span class="disclaimerInner" id="' + me.id + '_disclaimer_inner"></span>' +
+            '</div>';
+        facsContEvents += '</div>';
          
         me.html = '<div id="' + me.id + '_facsCont" style="background-color: black; top:0px; bottom: 0px; left: 0px; right: 0px; position:absolute;"></div>' + facsContEvents;
 
@@ -109,13 +112,29 @@ Ext.define('EdiromOnline.view.window.image.ImageViewer', {
         eventEl.unselectable();
         eventEl.on('mousedown', me.onMouseDown, me);
         eventEl.on('mousewheel', me.onScroll, me);
+        
+        if (me.disclaimer != null) {
+            me.setDisclaimer(me.disclaimer);
+        }
+    },
+    
+    setDisclaimer: function(disclaimer) {
+        var me = this;
+        
+        var el = document.getElementById(me.id + '_disclaimer_inner');
+        
+        me.disclaimer = disclaimer;         
+        
+        el.innerHTML = me.disclaimer;
+        el.style.visibility = me.disclaimer ? 'visible' : 'hidden';
     },
 
-    showImage: function(path, width, height, pageId) {
+    showImage: function(path, width, height, pageId, rotate) {
         var me = this;
 
         me.imgWidth = width;
         me.imgHeight = height;
+        me.imgRotate = null;
         me.imgPath = path;
         me.imgId = pageId;
 
@@ -130,6 +149,7 @@ Ext.define('EdiromOnline.view.window.image.ImageViewer', {
         me.hiResImg.attr({'stroke-width': 0});
         me.hiResImg.hide();
 
+        me.rotateView(rotate);
         me.fitInImage();
         
         me.fireEvent('imageChanged', me, path, pageId);
@@ -327,6 +347,20 @@ Ext.define('EdiromOnline.view.window.image.ImageViewer', {
         Ext.select('span[data-edirom-annot-id=' + annotId + ']', this.el).removeCls('combinedHighlight');
     },
 
+    rotateView: function(absoluteRotationAngle) {
+        var me = this;
+
+        if (typeof absoluteRotationAngle == 'undefined' || me.imgRotate == absoluteRotationAngle) return;
+
+        me.baseImg.transform("");
+        me.baseImg.rotate(absoluteRotationAngle);
+        me.hiResImg.transform("");
+        me.hiResImg.rotate(absoluteRotationAngle, 0, 0);
+        me.imgRotate = absoluteRotationAngle;
+
+        me.repositionShapes();
+    },
+
     repositionShapes: function() {
         var me = this;
 
@@ -357,6 +391,10 @@ Ext.define('EdiromOnline.view.window.image.ImageViewer', {
                 }
 
                 var shapeEl = shapeDiv.getById(me.id + '_' + id);
+                if (me.imgRotate == 180) {
+                    x = me.imgWidth - x - width;
+                    y = me.imgHeight - y - height;
+                }
                 shapeEl.setStyle({
                     top: Math.round((y * me.zoom) + me.offY) + "px",
                     left: Math.round((x * me.zoom) + me.offX) + "px",
@@ -667,6 +705,11 @@ Ext.define('EdiromOnline.view.window.image.ImageViewer', {
             position: 'absolute'
         });
 
+        if (me.imgRotate == 180) {
+            x = me.imgWidth - x - width;
+            y = me.imgHeight - y - height;
+        }
+
         var shape = {
             id: id,
             ulx: x,
@@ -763,6 +806,11 @@ Ext.define('EdiromOnline.view.window.image.ImageViewer', {
         var imgWidth = (me.getWidth() / me.zoom);
         var imgHeight = (me.getHeight() / me.zoom);
 
+        if (me.imgRotate == 180) {
+            imgX = me.imgWidth - imgX - imgWidth;
+            imgY = me.imgHeight - imgY - imgHeight;
+        }
+
         if(imgWidth > me.imgWidth - imgX) imgWidth = me.imgWidth - imgX;
         if(imgHeight > me.imgHeight - imgY) imgHeight = me.imgHeight - imgY;
 
@@ -788,6 +836,13 @@ Ext.define('EdiromOnline.view.window.image.ImageViewer', {
         var wh = imgHeight / me.imgHeight;
 
         //Ext.log("dw: " + dw + ", dh: " + dh + ", wx: " + wx + ", wy: " + wy + ", ww: " + ww + ", wh: " + wh);
+
+        if (me.imgRotate == 180) {
+            imgX = (me.offX / me.zoom) - imgWidth;
+            imgY = (me.offY / me.zoom) - imgHeight;
+            if ((me.offX / me.zoom) > 0) imgX -= (me.offX / me.zoom)
+            if ((me.offY / me.zoom) > 0) imgY -= (me.offY / me.zoom)
+        }
 
         me.imageLoader.addJob({
             img: me.hiResImg,

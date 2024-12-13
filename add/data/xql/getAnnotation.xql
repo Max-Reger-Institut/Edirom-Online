@@ -266,7 +266,7 @@ declare function local:getItemLabel($elem as element()) {
     let $name := local-name($elem)
     return (
         if($name = 'measure')
-        then(if ($lang = 'de') then (concat('Takt ',$elem/@n)) else (concat('Bar ',$elem/@n)))
+        then(if ($lang = 'de') then (concat('Takt ', if ($elem/@label) then ($elem/@label) else ($elem/@n))) else (concat('Bar ',if ($elem/@label) then ($elem/@label) else ($elem/@n))))
         else(),
         
         if($name = 'staff')
@@ -335,6 +335,7 @@ let $docUri := substring-before($uri, '#')
 let $internalId := substring-after($uri, '#')
 let $doc := doc($docUri)
 let $annot := $doc/id($internalId)
+let $workID := substring-before(functx:substring-after-last($docUri, '/'), '.xml')
 
 let $participants := annotation:getParticipants($annot)
 
@@ -353,7 +354,7 @@ let $sourcesLabel := if ($lang = 'de')
                         then (if(count($sources) gt 1)then('Quellen')else('Quelle'))
                         else(if(count($sources) gt 1)then('Sources')else('Source'))
 
-let $sigla := source:getSiglaAsArray($participants)
+let $sigla := source:getSiglaAsArray($participants, $workID)
 let $siglaLabel := if ($lang = 'de')
                         then (if(count($sigla) gt 1)then('Siglen')else('Siglum'))
                         else(if(count($sigla) gt 1)then('Sources')else('Source'))

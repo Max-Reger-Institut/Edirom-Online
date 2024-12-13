@@ -1,4 +1,4 @@
-xquery version "1.0";
+xquery version "3.1";
 (:
   Edirom Online
   Copyright (C) 2011 The Edirom Project
@@ -32,7 +32,10 @@ declare namespace xmldb="http://exist-db.org/xquery/xmldb";
 declare option exist:serialize "method=text media-type=text/plain omit-xml-declaration=yes";
 
 let $uri := request:get-parameter('uri', '')
+let $lang := request:get-parameter('lang', 'en')
 let $mei := eutil:getDoc($uri)/root()
+
+let $disclaimer := $mei//mei:pubStmt//mei:useRestrict[@type = 'disclaimer'][if (./@xml:lang) then (./@xml:lang = $lang) else (.)]/string() => replace('\n', '<br>')
 
 let $ret := for $surface in $mei//mei:surface
             (:let $image := doc($surface/mei:graphic[@type='facsimile']/string(@target))/img:image:)
@@ -43,7 +46,8 @@ let $ret := for $surface in $mei//mei:surface
                     'path: "', $graphic/string(@target), '", ',
                     'name: "', $surface/string(@n), '", ',
                     'width: "', $graphic/string(@width), '", ',
-                    'height: "', $graphic/string(@height), '"',
+                    'height: "', $graphic/string(@height), '", ',
+                    'disclaimer: "', $disclaimer, '"',
                 '}')
                 
 let $ret := if(count($ret) = 0)

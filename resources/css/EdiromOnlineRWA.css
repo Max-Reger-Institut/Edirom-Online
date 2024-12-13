@@ -36,6 +36,13 @@ span.uline {
     text-decoration: underline;
 }
 
+.annotView .previewArea .previewItem .imgBox {
+    bottom: 40px;
+}
+
+.annotView .previewArea .previewItem .label {
+    height: 32px;
+}
 
 span.title {
     font-style: italic;
@@ -606,5 +613,18 @@ figcaption {
 #navigator .navigatorItem {
     padding: 3px 0 2px 10px;
     line-height: 1.2;
+}
+
+
+div.rwaNavigatorVolIdent {
+    text-align: center;
+    margin-bottom: 0.5rem;
+    padding-right: 8px;
+    background-color: rgb(141, 65, 93);
+    margin-right: 8px;
+    padding-top: 5px;
+    color: rgb(243, 239, 220);
+    font-weight: bold;
+    border-radius: 5px;
 }
 
