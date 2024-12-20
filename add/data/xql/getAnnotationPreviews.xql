@@ -123,7 +123,7 @@ declare function local:getSourceParticipants($participants as xs:string*, $doc a
             let $sourceSiglum    := mriSource:getCriticalReportSiglum($sourceID, $workID)
             
             let $source := $sourceType
-            let $siglum := $sourceSiglum
+            let $siglum := if (string-length($sourceSiglum) = 0) then $sourceType else $sourceSiglum
             let $part := string-join(distinct-values(for $e in $elems return $e/ancestor::mei:part/@label),'-')
             
             let $disclaimer := doc($doc)//mei:pubStmt//mei:useRestrict[@type = 'disclaimer'][if (./@xml:lang) then (./@xml:lang = $lang) else (.)]/string() => replace('\n', '<br>')
