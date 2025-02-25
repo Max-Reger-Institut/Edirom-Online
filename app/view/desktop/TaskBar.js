@@ -98,19 +98,19 @@ Ext.define('EdiromOnline.view.desktop.TaskBar', {
                 {
                     xtype: 'button',
                     cls: 'taskSquareButton grid',
-                    tooltip: { text: getLangString('view.desktop.TaskBar_Sort_grid'), align: 'bl-tl' },
+                    tooltip: { text: getLangString('view.desktop.TaskBar_Sort_grid'), width: 100, align: 'bl-tl' },
                     handler: Ext.bind(this.fireEvent, me, ['sortGrid'], false)
                 },
                 {
                     xtype: 'button',
                     cls: 'taskSquareButton vertical',
-                    tooltip: { text: getLangString('view.desktop.TaskBar_Sort_vertical'), align: 'bl-tl' },
+                    tooltip: { text: getLangString('view.desktop.TaskBar_Sort_vertical'), width: 100, align: 'bl-tl' },
                     handler: Ext.bind(this.fireEvent, me, ['sortVertically'], false)
                 },
                 {
                     xtype: 'button',
                     cls: 'taskSquareButton horizontal',
-                    tooltip: { text: getLangString('view.desktop.TaskBar_Sort_horizontal'), align: 'bl-tl' },
+                    tooltip: { text: getLangString('view.desktop.TaskBar_Sort_horizontal'), width: 100, align: 'bl-tl' },
                     handler: Ext.bind(this.fireEvent, me, ['sortHorizontally'], false)
                 }
             ]
@@ -132,7 +132,7 @@ Ext.define('EdiromOnline.view.desktop.TaskBar', {
             id: 'annotationsBtn',
             cls: 'taskSquareButton annotations',
             enableToggle: true,
-            tooltip: { text: getLangString('view.desktop.TaskBar_annotations'), align: 'bl-tl' },
+            tooltip: { text: getLangString('view.desktop.TaskBar_annotations'), width: 100, align: 'bl-tl' },
             action: 'toggleAnnotationVisibility'
         });
 
@@ -170,7 +170,7 @@ Ext.define('EdiromOnline.view.desktop.TaskBar', {
         me.concordanceButton = Ext.create('Ext.button.Button', {
             id: 'taskbarConcordanceBtn',
             cls: 'taskSquareButton concordance',
-            tooltip: { text: getLangString('view.desktop.TaskBar_concordanceNav'), align: 'bl-tl' },
+            tooltip: { text: getLangString('view.desktop.TaskBar_concordanceNav'), width: 130, align: 'bl-tl' },
             handler: Ext.bind(me.fireEvent, me, ['openConcordanceNavigator'], false)
         });
 
