@@ -35,7 +35,8 @@ Ext.define('EdiromOnline.controller.window.source.MeasureBasedView', {
             'horizontalMeasureViewer': {
                 showMeasure: this.onShowMeasure,
                 measureVisibilityChange: this.onMeasureVisibilityChange,
-                annotationsVisibilityChange: this.onAnnotationsVisibilityChange
+                annotationsVisibilityChange: this.onAnnotationsVisibilityChange,
+                overlayVisiblityChange: this.onOverlayVisiblityChange
             }
         });
     },
@@ -190,5 +191,46 @@ Ext.define('EdiromOnline.controller.window.source.MeasureBasedView', {
 
         viewer.addAnnotations(annotations);
         sourceView.annotationFilterChanged();
+    },
+    
+    onOverlayVisiblityChange: function(viewer, overlays, pageId, uri, sourceView, args) {
+        var me = this;
+        
+        Ext.Array.each(Object.keys(overlays), function(overlayId) {
+           
+           if(overlays[overlayId]) {
+               
+               window.doAJAXRequest('data/xql/getOverlayOnPage.xql',
+                   'GET', 
+                   {
+                       uri: uri,
+ 					  pageId: pageId,
+ 					  overlayId: overlayId
+                   },
+                   Ext.bind(function(response){
+                     var data = response.responseText;
+ 					
+ 					if (data.trim() == '') return;
+ 					
+ 					var overlay = Ext.create('Ext.data.Store', {
+                         fields: ['id', 'svg'],
+                         data: Ext.JSON.decode(data)
+                     });
+ 
+ 					
+ 					me.overlayLoaded(viewer, pageId, overlayId, overlay, sourceView);
+                   }, this)
+               );
+           }else {
+               viewer.removeSVGOverlay(overlayId);
+           }
+        });
+    },
+    
+    overlayLoaded: function(viewer, pageId, overlayId, overlay, sourceView) {
+
+        if(pageId != viewer.imgId) return;
+
+        viewer.addSVGOverlay(overlayId, overlay);
     }
 });
