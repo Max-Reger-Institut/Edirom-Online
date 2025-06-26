@@ -526,13 +526,14 @@ Ext.define('EdiromOnline.view.window.image.ImageViewer', {
         }
     },
 
-    addSVGOverlay: function(overlayId, overlay) {
+    addSVGOverlay: function(overlayId, overlay, name, uri, fn) {
+        
         var me = this;
         var sibling = me.el.getById(me.id + '_facsContEvents');
 
         var dh = Ext.DomHelper;
         var id = Ext.id({});
-        var svg = dh.insertBefore(sibling, {
+        var svg = dh.append(sibling, {
             id: me.id + '_' + id,
             tag: 'div',
             cls: 'overlay',
@@ -543,10 +544,45 @@ Ext.define('EdiromOnline.view.window.image.ImageViewer', {
         svg.child('svg', true).setAttribute("height", me.imgHeight * me.zoom);
         svg.child('svg', true).setAttribute("style", "top:" +  me.offY + "px; left:" +  me.offX + "px; position: absolute;");
 
+        if(typeof uri != 'undefined' || typeof fn != 'undefined') {
+            var children = svg.child('svg', true).children;
+            for(var i = 0; i < children.length; i++) {
+                var elem = children[i];
+                elem.setAttribute("id", me.id + '_' + Ext.id({}));
+                
+                if(typeof fn != 'undefined')
+                    elem.setAttribute('onmousedown', fn);
+                
+                if(typeof uri != 'undefined') {
+                    var tip = Ext.create('Ext.tip.ToolTip', {
+                        target: elem.id,
+                        cls: 'annotationTip',
+                        width: me.annotTipWidth,
+                        maxWidth: me.annotTipMaxWidth,
+                        height: me.annotTipHeight,
+                        maxHeight: me.annotTipMaxHeight,
+                        dismissDelay: 0,
+                        anchor: 'left',
+                        html: getLangString('Annotation_plus_Title', name)
+                    });
+                    tip.on('afterrender', function() {
+                        window.doAJAXRequest('data/xql/getAnnotation.xql', 'GET', {
+                            uri: uri,
+                            target: 'tip',
+                            edition: EdiromOnline.getApplication().activeEdition
+                        }, Ext.bind(function(response) {
+                            this.update(response.responseText);
+                        }, this));
+                    }, tip);
+                }
+            }
+        }
+
         me.svgOverlays.add(overlayId, svg);
     },
 
     removeSVGOverlay: function(overlayId) {
+        
         var me = this;
         me.svgOverlays.get(overlayId).destroy();
         me.svgOverlays.removeAtKey(overlayId);
