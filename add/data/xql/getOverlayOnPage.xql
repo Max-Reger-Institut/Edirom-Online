@@ -43,5 +43,5 @@ let $overlay := $mei/id($overlayId)
 let $plist := tokenize(replace($overlay/@plist, '#', ''), '\s+')
 
 let $surface := $mei/id($surfaceId)
-return $surface/svg:svg[@xml:id = $plist]
+return $surface/svg:svg[@id = $plist]
 
