@@ -210,7 +210,8 @@ Ext.define('EdiromOnline.controller.window.source.MeasureBasedView', {
                    Ext.bind(function(response){
                      var data = response.responseText;
  					
- 					if (data.trim() == '') return;
+ 					if (data.trim() == '' || Ext.JSON.decode(data)['svg'] == null) return;
+ 					if (viewer.svgOverlays.get(overlayId)) return; // skip if already added
  					
  					var overlay = Ext.create('Ext.data.Store', {
                          fields: ['id', 'svg'],

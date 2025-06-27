@@ -537,7 +537,7 @@ Ext.define('EdiromOnline.view.window.image.ImageViewer', {
             id: me.id + '_' + id,
             tag: 'div',
             cls: 'overlay',
-            html: overlay
+            html: overlay.getAt(0).get("svg")
         }, true);
 
         svg.child('svg', true).setAttribute("width", me.imgWidth * me.zoom);
@@ -584,7 +584,9 @@ Ext.define('EdiromOnline.view.window.image.ImageViewer', {
     removeSVGOverlay: function(overlayId) {
         
         var me = this;
-        me.svgOverlays.get(overlayId).destroy();
+        if (me.svgOverlays.get(overlayId)) {
+            me.svgOverlays.get(overlayId).destroy();
+        }
         me.svgOverlays.removeAtKey(overlayId);
     },
 
