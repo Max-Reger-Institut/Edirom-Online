@@ -439,7 +439,8 @@ Ext.define('EdiromOnline.view.window.source.HorizontalMeasureViewer', {
             }
         });
     },
-    
+
+    onOverlayVisibilityChange: function(view, state) {
     var me = this;
 
         Ext.Array.each(me.imageViewers, function(viewer) {
