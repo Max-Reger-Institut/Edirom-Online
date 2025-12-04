@@ -84,6 +84,7 @@ declare function local:getMeasures($mei as node(), $mdivID as xs:string, $lang a
                         else (
                             number(functx:substring-before-if-contains(functx:substring-after-if-contains(@label, '('), ')')) = number($mentionedMeasureLabel)
                         )
+                    )
                 ]
                 return
                     if (count($partMeasures) > 1)
