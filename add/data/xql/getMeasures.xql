@@ -30,6 +30,13 @@ import module namespace console="http://exist-db.org/xquery/console";
 
 declare option exist:serialize "method=text media-type=text/plain omit-xml-declaration=yes";
 
+declare function local:sortMeasureLabels( $seq as item()* )  as item()* {
+
+   for $item in $seq
+   order by number(functx:substring-before-match($item, '[a-z]')), functx:substring-after-last-match($item, '\d')
+   return $item
+ } ;
+
 declare function local:getMeasures($mei as node(), $mdivID as xs:string, $lang as xs:string) as xs:string* {
     
     let $disclaimer := $mei//mei:pubStmt//mei:useRestrict[@type = 'disclaimer'][if (./@xml:lang) then (./@xml:lang = $lang) else (.)]/string() => replace('\n', '<br>')
@@ -59,7 +66,7 @@ declare function local:getMeasures($mei as node(), $mdivID as xs:string, $lang a
                         $labelsAnalyzed
             )
             else ($measuresNotDel/@n)
-        let $allEverMentionedMeasureLabelsDistinct := distinct-values(functx:sort-as-numeric($allEverMentionedMeasureLabels))
+        let $allEverMentionedMeasureLabelsDistinct := distinct-values(local:sortMeasureLabels($allEverMentionedMeasureLabels))
         
         let $parts := $mdiv//mei:part
         for $mentionedMeasureLabel in $allEverMentionedMeasureLabelsDistinct
@@ -72,8 +79,11 @@ declare function local:getMeasures($mei as node(), $mdivID as xs:string, $lang a
                         number(substring-after(functx:substring-before-if-contains(functx:substring-after-if-contains(@label, '('), ')'), '–'))  >= number($mentionedMeasureLabel)
                     )
                     else (
-                        number(functx:substring-before-if-contains(functx:substring-after-if-contains(@label, '('), ')')) = number($mentionedMeasureLabel)
-                    )
+                        if (matches(@label, '\d[a-z]'))
+                        then (./@label/string() = $mentionedMeasureLabel)
+                        else (
+                            number(functx:substring-before-if-contains(functx:substring-after-if-contains(@label, '('), ')')) = number($mentionedMeasureLabel)
+                        )
                 ]
                 return
                     if (count($partMeasures) > 1)
