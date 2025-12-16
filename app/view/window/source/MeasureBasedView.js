@@ -401,12 +401,13 @@ Ext.define('EdiromOnline.view.window.source.HorizontalMeasureViewer', {
         
         me.addEvents('showMeasure',
             'measureVisibilityChange',
-            'annotationsVisibilityChange');
+            'annotationsVisibilityChange',
+            'overlayVisibilityChange');
         
         // SourceView
         me.owner.owner.on('measureVisibilityChange', me.onMeasureVisibilityChange, me);
         me.owner.owner.on('annotationsVisibilityChange', me.onAnnotationsVisibilityChange, me);
-        
+        me.owner.owner.on('overlayVisiblityChange', me.onOverlayVisibilityChange, me);
         var viewer = Ext.create('EdiromOnline.view.window.image.ImageViewer', {flex: 1, partLabel: me.partLabel, disclaimer: me.disclaimer});
         viewer.on('imageChanged', me.onViewerImageChange, me);
         
@@ -438,13 +439,24 @@ Ext.define('EdiromOnline.view.window.source.HorizontalMeasureViewer', {
             }
         });
     },
-    
+
+    onOverlayVisibilityChange: function(view, state) {
+    var me = this;
+
+        Ext.Array.each(me.imageViewers, function(viewer) {
+            if(viewer.isVisible()) {
+                me.fireEvent('overlayVisiblityChange', viewer, me.owner.owner.overlaysVisible, viewer.imgId, me.owner.owner.uri, me.owner.owner);
+            }
+        });
+    },
+
     onViewerImageChange: function(viewer, path, pageId) {
         var me = this;
         me.fireEvent('measureVisibilityChange', viewer, me.owner.owner.measuresVisible, viewer.imgId, me.owner.owner.uri);
         me.fireEvent('annotationsVisibilityChange', viewer, me.owner.owner.annotationsVisible, viewer.imgId, me.owner.owner.uri, me.owner.owner);
+        me.fireEvent('overlayVisiblityChange', viewer, me.owner.owner.overlaysVisible, viewer.imgId, me.owner.owner.uri, me.owner.owner);
     },
-    
+
     setMeasure: function(measure, measureCount) {
         var me = this;
         

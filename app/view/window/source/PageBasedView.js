@@ -38,15 +38,19 @@ Ext.define('EdiromOnline.view.window.source.PageBasedView', {
     cls: 'pageBasedView',
 
     initComponent: function () {
-        this.imageViewer = Ext.create('EdiromOnline.view.window.image.ImageViewer', {disclaimer: this.disclaimer});
+
+        var me = this;
+        me.addEvents('overlayVisibilityChange');
+        me.owner.on('overlayVisiblityChange', me.onOverlayVisibilityChange, me);
+        me.imageViewer = Ext.create('EdiromOnline.view.window.image.ImageViewer', {disclaimer: this.disclaimer});
 
         this.items = [
-            this.imageViewer
+            me.imageViewer
         ];
 
-        this.callParent();
+        me.callParent();
 
-        this.imageViewer.on('zoomChanged', this.updateZoom, this);
+        me.imageViewer.on('zoomChanged', me.updateZoom, me);
     },
 
     annotationFilterChanged: function(visibleCategories, visiblePriorities) {
@@ -113,6 +117,11 @@ Ext.define('EdiromOnline.view.window.source.PageBasedView', {
 
         if(me.owner.annotationsVisible)
             me.owner.fireEvent('annotationsVisibilityChange', me.owner, true);
+
+        var layers = Object.keys(me.owner.overlaysVisible);
+        Ext.Array.each(layers, function(layer) {
+			me.owner.fireEvent('overlayVisiblityChange', me.owner, layer, me.owner.overlaysVisible[layer]);
+        });
 
     },
 
@@ -204,6 +213,11 @@ Ext.define('EdiromOnline.view.window.source.PageBasedView', {
     showAnnotations: function(annotations) {
         var me = this;
         me.imageViewer.addAnnotations(annotations);
+    },
+
+    onOverlayVisibilityChange: function(view, state) {
+        var me = this;
+        me.fireEvent('overlayVisiblityChange', me, me.owner.overlaysVisible, me.getActivePage().get('id'), me.owner.uri, me.owner);
     },
 
     hideAnnotations: function() {
