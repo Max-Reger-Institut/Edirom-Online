@@ -37,10 +37,11 @@ declare namespace conf="https://www.maxreger.info/conf";
 declare option exist:serialize "method=text media-type=text/plain omit-xml-declaration=yes";
 
 let $uri := request:get-parameter('uri', '')
+let $lang := request:get-parameter('lang', '')
 
 let $configResource := doc('xmldb:exist:///db/apps/mriExistDBconf/config.xml')
 let $rwaOnlineUrl := $configResource//conf:rwaOnlineURL
-let $getAnnotationsRequestURL := concat($rwaOnlineUrl, '/resources/xql/getAnnotations.xql?uri=', $uri)
+let $getAnnotationsRequestURL := concat($rwaOnlineUrl, '/resources/xql/getAnnotations.xql?lang=', $lang, '&amp;uri=', $uri)
 let $queryResult := hc:send-request(<hc:request href="{$getAnnotationsRequestURL}" method="get"/>)[2]
 
 return 
