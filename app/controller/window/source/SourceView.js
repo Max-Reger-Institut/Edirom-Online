@@ -235,7 +235,7 @@ Ext.define('EdiromOnline.controller.window.source.SourceView', {
         view.showAnnotations(annotations);
     },
 
-    onGotoMeasureByName: function (view,                measure, movementId) {
+    onGotoMeasureByName: function (view, measure, movementId) {
         var me = this;
 
         Ext.Ajax.request({
