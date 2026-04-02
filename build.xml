@@ -21,6 +21,7 @@
         <exec executable="sencha">
             <arg value="app"/>
             <arg value="build"/>
+            <arg value="testing"/>
         </exec>
         <delete dir="${temp.dir}"></delete>
     </target>
