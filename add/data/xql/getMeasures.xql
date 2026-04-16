@@ -79,7 +79,7 @@ declare function local:getMeasures($mei as node(), $mdivID as xs:string, $lang a
                         number(substring-after(functx:substring-before-if-contains(functx:substring-after-if-contains(@label, '('), ')'), '–'))  >= number($mentionedMeasureLabel)
                     )
                     else (
-                        if (matches(@label, '\d[a-z]'))
+                        if (matches(@label, '\d[a-z|&apos;]'))
                         then (./@label/string() = $mentionedMeasureLabel)
                         else (
                             number(functx:substring-before-if-contains(functx:substring-after-if-contains(@label, '('), ')')) = number($mentionedMeasureLabel)
