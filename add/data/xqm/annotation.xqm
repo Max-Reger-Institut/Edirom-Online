@@ -90,7 +90,7 @@ declare function annotation:annotationsGetOptions($uri as xs:string) {
 };
 
 (:~
-: Returns an string naming the filter option value
+: Returns a string naming the filter option value
 :
 : @param $options The options array
 : @param $option The string naming the option to filter (type, category, priority of annot)
