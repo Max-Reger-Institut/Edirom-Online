@@ -65,6 +65,7 @@
             <xsl:when test="matches($objectID, 'mri_inst_*')">mriPersonalia</xsl:when>
             <xsl:when test="matches($objectID, 'mri_template_*')">mriTemplate</xsl:when>
             <xsl:when test="matches($objectID, 'mri_loc_*')">mriLocation</xsl:when>
+            <xsl:when test="matches($objectID, 'mri_bibl_*')">mriBibl</xsl:when>
             <xsl:when test="matches($objectID, 'rwa_post_*')">rwaBlogpost</xsl:when>
             <xsl:when test="matches($objectID, 'bio_*')">mrpBio</xsl:when>
             <xsl:when test="matches($objectID, 'rwa_annotation_*')">rwaAnnot</xsl:when>
@@ -102,9 +103,10 @@
         <span class="sup"><xsl:value-of select="$footnoteCount"/></span>
     </xsl:template>
     
-    <xsl:template match="mei:ref">
-        <xsl:variable name="objectID" select="replace(replace(./@target/string(), '\.(html|xml)', ''), '#(.*)?', '')"/>
-        <xsl:variable name="objectIDHashtag" select="replace(replace(./@target/string(), '\.(html|xml)', ''), '(.*)?#', '#')"/>
+    <xsl:template match="mei:ref|mei:bibl">
+        <xsl:variable name="objectIdString" select="./@*[name() = ('target', 'corresp')]/string()"/>
+        <xsl:variable name="objectID" select="replace(replace($objectIdString, '\.(html|xml)', ''), '#(.*)?', '')"/>
+        <xsl:variable name="objectIDHashtag" select="replace(replace($objectIdString, '\.(html|xml)', ''), '(.*)?#', '#')"/>
         <xsl:variable name="objectType" select="local:getObjectType($objectID)"/>
         <xsl:choose>
             <xsl:when test="local:isActiveObjectType($objectType)">
