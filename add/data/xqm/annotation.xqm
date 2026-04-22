@@ -76,7 +76,7 @@ declare function annotation:annotationsGetOptions($uri as xs:string) {
         then (tokenize(substring-after($uri, '?'), '&amp;'))
         else ()
     let $options :=
-        if ($options)
+        if (exists($options))
         then (
             for $option in $options
             let $optionName := substring-before($option, '=')
@@ -118,9 +118,9 @@ declare function annotation:validateAnnotationOptions($options, $option) {
 :)
 declare function annotation:filterAnnotations($uri, $optionAnnotType, $optionAnnotCategory, $optionAnnotPriority) {
     doc($uri)//mei:annot[
-                if ($optionAnnotType) then (@type = $optionAnnotType) else (@type = 'editorialComment')][
-                if ($optionAnnotCategory) then (contains(./mei:ptr[@type = 'categories']/@target, $optionAnnotCategory)) else (.)][
-                if ($optionAnnotPriority) then (contains(./mei:ptr[@type = 'priority']/@target, $optionAnnotPriority)) else (.)]
+                if (exists($optionAnnotType)) then (@type = $optionAnnotType) else (@type = 'editorialComment')][
+                if (exists($optionAnnotCategory)) then (contains(./mei:ptr[@type = 'categories']/@target, $optionAnnotCategory)) else (.)][
+                if (exists($optionAnnotPriority)) then (contains(./mei:ptr[@type = 'priority']/@target, $optionAnnotPriority)) else (.)]
 };
 
 (:~
