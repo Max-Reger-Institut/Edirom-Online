@@ -41,7 +41,7 @@ let $lang := request:get-parameter('lang', '')
 
 let $configResource := doc('xmldb:exist:///db/apps/mriExistDBconf/config.xml')
 let $rwaOnlineUrl := $configResource//conf:rwaOnlineURL
-let $getAnnotationsRequestURL := concat($rwaOnlineUrl, '/resources/xql/getAnnotations.xql?lang=', $lang, '&amp;uri=', $uri)
+let $getAnnotationsRequestURL := concat($rwaOnlineUrl, '/resources/xql/getAnnotations.xql?lang=', $lang, '&amp;uri=', fn:encode-for-uri($uri))
 let $queryResult := hc:send-request(<hc:request href="{$getAnnotationsRequestURL}" method="get"/>)[2]
 
 return 

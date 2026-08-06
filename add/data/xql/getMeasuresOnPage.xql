@@ -45,20 +45,24 @@ declare function local:getMeasures($mei as node(), $surface as node()) as xs:str
 
     for $zone in $surface/mei:zone[@type='measure']
     let $measures := $mei//mei:measure[@facs=concat('#', $zone/@xml:id)]
+    let $measureLabel :=
+        if ($measures/@label)
+        then (string-join($measures/@label/string(), ' | '))
+        else (string-join($measures/@n/string(), ' | '))
+    let $mesaureFirstID := $measures[1]/string(@xml:id)
+    let $measureFirstType := $measures[1]/string(@type)
+    let $measureFirstMRest := local:getMRest($measures[1])
     return
-        for $measure in $measures
-        let $measureLabel := if ($measure/@label) then ($measure/string(@label)) else ($measure/string(@n))
-        return
         concat('{',
             'zoneId: "', $zone/string(@xml:id), '", ',
             'ulx: "', $zone/string(@ulx), '", ',
             'uly: "', $zone/string(@uly), '", ',
             'lrx: "', $zone/string(@lrx), '", ',
             'lry: "', $zone/string(@lry), '", ',
-            'id: "', $measure/string(@xml:id), '", ',
+            'id: "', $mesaureFirstID, '", ',
             'name: "', $measureLabel, '", ',
-            'type: "', $measure/string(@type), '", ',
-            'rest: "', local:getMRest($measure), '"',
+            'type: "', $measureFirstType, '", ',
+            'rest: "', $measureFirstMRest, '"',
         '}')
 };
 
