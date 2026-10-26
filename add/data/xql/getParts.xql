@@ -24,6 +24,7 @@ declare namespace mei="http://www.music-encoding.org/ns/mei";
 declare namespace xmldb="http://exist-db.org/xquery/xmldb";
 declare namespace conf="https://www.maxreger.info/conf";
 
+import module namespace functx="http://www.functx.com";
 
 declare option exist:serialize "method=text media-type=text/plain omit-xml-declaration=yes";
 
@@ -40,7 +41,7 @@ let $ret :=
             let $mrpUrl := $configResource//conf:mrpURL
             let $key := $part/@auth
             let $keyTranslationURL := concat($mrpUrl, 'cat/rest/getTranslation.xql?key=', $key)
-            let $partTranslated := hc:send-request(<hc:request href="{$keyTranslationURL}" method="get"/>)[2]
+            let $partTranslated := functx:capitalize-first(hc:send-request(<hc:request href="{$keyTranslationURL}" method="get"/>)[2])
             return concat('{label:  "', $partTranslated, '", id:"', $part/@xml:id, '", selectedByDefault:true, selected:true}')
     )
     else (

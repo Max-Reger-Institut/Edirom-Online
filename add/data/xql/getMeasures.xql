@@ -88,7 +88,7 @@ declare function local:getMeasures($mei as node(), $mdivID as xs:string, $lang a
                     let $perfRes := $mei/id($id)
                     let $perfResLangKey := $perfRes/@auth/string()
                     let $keyTranslationURL := concat($mrpUrl, 'cat/rest/getTranslation.xql?key=', $perfResLangKey)
-                    let $perfResLangValue := hc:send-request(<hc:request href="{$keyTranslationURL}" method="get"/>)[2]
+                    let $perfResLangValue := functx:capitalize-first(hc:send-request(<hc:request href="{$keyTranslationURL}" method="get"/>)[2])
                     return
                         $perfResLangValue
                 )
