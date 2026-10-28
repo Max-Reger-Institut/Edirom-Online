@@ -22,7 +22,7 @@ xquery version "3.1";
 declare namespace request="http://exist-db.org/xquery/request";
 declare namespace mei="http://www.music-encoding.org/ns/mei";
 declare namespace xlink="http://www.w3.org/1999/xlink";
-
+declare namespace conf="https://www.maxreger.info/conf";
 declare namespace xmldb="http://exist-db.org/xquery/xmldb";
 
 import module namespace functx="http://www.functx.com";
@@ -37,12 +37,15 @@ declare function local:sortMeasureLabels( $seq as item()* )  as item()* {
    return $item
  } ;
 
-declare function local:getMeasures($mei as node(), $mdivID as xs:string, $lang as xs:string) as xs:string* {
+declare function local:getMeasures($mei as node(), $mdivID as xs:string, $lang as xs:string, $meiVersion as xs:int) as xs:string* {
     
     let $disclaimer := $mei//mei:pubStmt//mei:useRestrict[@type = 'disclaimer'][if (./@xml:lang) then (./@xml:lang = $lang) else (.)]/string() => replace('\n', '<br>')
     
+    let $configResource := doc('xmldb:exist:///db/apps/mriExistDBconf/config.xml')
+    let $mrpUrl := $configResource//conf:mrpURL
+
     return if($mei//mei:parts)
-    then(
+    then (
         let $mdiv := $mei/id($mdivID)
         let $measuresNotDel := $mdiv//mei:measure[not(parent::mei:del)] (: all measures except those which are surrounded by <del> :)
         let $allEverMentionedMeasureLabels := 
@@ -69,9 +72,31 @@ declare function local:getMeasures($mei as node(), $mdivID as xs:string, $lang a
         let $allEverMentionedMeasureLabelsDistinct := distinct-values(local:sortMeasureLabels($allEverMentionedMeasureLabels))
         
         let $parts := $mdiv//mei:part
+
+        let $staffDefDeclsIDs :=
+            if ($meiVersion >= 5)
+            then (
+                for $staffDef in $parts//mei:staffDef
+                    let $declsRef := $staffDef/@decls/string()
+                    return substring-after($declsRef, '#')
+                )
+            else ()
+        let $staffDefPartLabels :=
+            if ($meiVersion >= 5)
+            then (
+                for $id in $staffDefDeclsIDs
+                    let $perfRes := $mei/id($id)
+                    let $perfResLangKey := $perfRes/@auth/string()
+                    let $keyTranslationURL := concat($mrpUrl, 'cat/rest/getTranslation.xql?key=', $perfResLangKey)
+                    let $perfResLangValue := functx:capitalize-first(hc:send-request(<hc:request href="{$keyTranslationURL}" method="get"/>)[2])
+                    return
+                        $perfResLangValue
+                )
+            else ()
+        
         for $mentionedMeasureLabel in $allEverMentionedMeasureLabelsDistinct
             let $resultMeasures := 
-                for $part in $parts
+                for $part at $i in $parts
                 let $partMeasures := $part//mei:measure[not(parent::mei:del)][
                     if (contains(@label, '–'))
                     then (
@@ -95,11 +120,21 @@ declare function local:getMeasures($mei as node(), $mdivID as xs:string, $lang a
                 return
                     if (count($partMeasures) > 1)
                     then (
-                        concat('{id: "', $partMeasures[1]/@xml:id, '?tstamp2=', count($partMeasures) - 1, 'm+0', '", voice: "', $partMeasures[1]/ancestor::mei:part//mei:staffDef/@decls, '", partLabel: "', $mei/id(substring-after($partMeasures[1]/ancestor::mei:part//mei:staffDef/@decls,'#'))/@label, '"}')
+                        let $partLabel :=
+                            if ($meiVersion >= 5)
+                            then ($staffDefPartLabels[$i])
+                            else ($mei/id(substring-after($partMeasures[1]/ancestor::mei:part//mei:staffDef/@decls,'#'))/@label)
+                        return
+                            concat('{id: "', $partMeasures[1]/@xml:id, '?tstamp2=', count($partMeasures) - 1, 'm+0', '", voice: "', $partMeasures[1]/ancestor::mei:part//mei:staffDef/@decls, '", partLabel: "', $partLabel, '"}')
                     )
                     else if (count($partMeasures) = 1)
                     then (
-                        concat('{id: "', $partMeasures[1]/@xml:id, '", voice: "', $partMeasures[1]/ancestor::mei:part//mei:staffDef/@decls, '", partLabel: "', $mei/id(substring-after($partMeasures[1]/ancestor::mei:part//mei:staffDef/@decls,'#'))/@label, '"}')
+                        let $partLabel :=
+                            if ($meiVersion >= 5)
+                            then ($staffDefPartLabels[$i])
+                            else ($mei/id(substring-after($partMeasures[1]/ancestor::mei:part//mei:staffDef/@decls,'#'))/@label)
+                        return
+                            concat('{id: "', $partMeasures[1]/@xml:id, '", voice: "', $partMeasures[1]/ancestor::mei:part//mei:staffDef/@decls, '", partLabel: "', $partLabel, '"}')
                     )
                     else ()
             return concat('{',
@@ -130,6 +165,8 @@ let $mdivID := request:get-parameter('mdiv', '')
 let $lang := request:get-parameter('lang', 'en')
 let $mei := doc($uri)/root()
 
-let $ret := local:getMeasures($mei, $mdivID, $lang)
+let $meiVersion := number(substring-before($mei/mei:mei/@meiversion/string(), '.'))
+
+let $ret := local:getMeasures($mei, $mdivID, $lang, $meiVersion)
 
 return concat('[', string-join($ret, ','), ']')

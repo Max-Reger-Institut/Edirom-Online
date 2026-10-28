@@ -21,15 +21,32 @@ xquery version "1.0";
 
 declare namespace request="http://exist-db.org/xquery/request";
 declare namespace mei="http://www.music-encoding.org/ns/mei";
-
 declare namespace xmldb="http://exist-db.org/xquery/xmldb";
+declare namespace conf="https://www.maxreger.info/conf";
+
+import module namespace functx="http://www.functx.com";
 
 declare option exist:serialize "method=text media-type=text/plain omit-xml-declaration=yes";
 
 let $uri := request:get-parameter('uri', '')
 let $mei := doc($uri)/root()
 
-let $ret := for $part in $mei//mei:instrumentation/mei:instrVoice
-            return concat('{label: "', $part/@label, '", id:"', $part/@xml:id, '", selectedByDefault:true, selected:true}')
+let $meiVersion := number(substring-before($mei/mei:mei/@meiversion/string(), '.'))
+
+let $ret :=
+    if ($meiVersion >= 5)
+    then (
+        for $part in $mei//mei:perfResList/mei:perfRes
+            let $configResource := doc('xmldb:exist:///db/apps/mriExistDBconf/config.xml')
+            let $mrpUrl := $configResource//conf:mrpURL
+            let $key := $part/@auth
+            let $keyTranslationURL := concat($mrpUrl, 'cat/rest/getTranslation.xql?key=', $key)
+            let $partTranslated := functx:capitalize-first(hc:send-request(<hc:request href="{$keyTranslationURL}" method="get"/>)[2])
+            return concat('{label:  "', $partTranslated, '", id:"', $part/@xml:id, '", selectedByDefault:true, selected:true}')
+    )
+    else (
+        for $part in $mei//mei:instrumentation/mei:instrVoice
+        return concat('{label: "', $part/@label, '", id:"', $part/@xml:id, '", selectedByDefault:true, selected:true}')
+        )
 
 return concat('[', string-join($ret, ','), ']')
